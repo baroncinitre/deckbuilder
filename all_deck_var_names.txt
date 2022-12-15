@@ -1,2 +1,4 @@
 mmog
 testdeck
+mmcurrent
+mmcurrent_backup
