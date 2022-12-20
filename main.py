@@ -18,7 +18,7 @@ from mtgtools.PSetList import PersistentList
 def main():
     # Current db is 'test_db.fs'
     builder = deckBuilder('test_db.fs', 'mmcurrent')
-    builder.print_planned_swaps()
+    builder.print_planned_swaps(index=True)
 
 if __name__ == "__main__":
     main()

@@ -46,15 +46,20 @@ class deckBuilder:
     def save(self):
         self.db.commit()
 
-    def remove_at_index(self, index, commit=True):
+    def remove_at_index(self, index, commit=True, deck=None):
+        if deck != None:
+            to_modify = deck
+        else:
+            to_modify = self.deck
+
         if type(index) == list:
             # This sorts and flips, removing from highest index to lowest
             # this SHOULD always mean indices stay the same. TODO: verify
             indices = sorted(index, reverse=True)
             for i in indices:
-                self.deck.pop(i)
+                to_modify.pop(i)
         else:
-            self.deck.pop(index)
+            to_modify.pop(index)
 
         self.save()
 
@@ -132,11 +137,35 @@ class deckBuilder:
             self.remove_card(card_out, deck=out_list)
             return
 
-    def execute_swaps(self):
-        #TODO implement
-        pass
+    def remove_swap(self, card_out, card_in, strict=True):
+        out_list_name = f"{self.deck_var_name}_swap_out"
+        in_list_name = f"{self.deck_var_name}_swap_in"
 
-    def print_planned_swaps(self):
+        try:
+            out_list = getattr(self.db.root, out_list_name)
+            in_list = getattr(self.db.root, in_list_name)
+        except:
+            print("No swaps currently planned")
+            return
+
+        if self.remove_card(card_out, deck=out_list, strict=strict):
+            print("Error removing out card, please try again")
+            return
+        if self.remove_card(card_in, deck=in_list, strict=strict):
+            print("Error removing in card, please try again")
+            self.add_card(card_out, deck=out_list)
+            return
+
+    def execute_swaps(self):
+        self.print_planned_swaps(index=True)
+        swaps_to_execute_str = input("Enter swaps to execute by index, separated by spaces")
+        swaps_to_execute = [int(swap_idx) for swap_idx in swaps_to_execute_str.split(' ')]
+        swaps_to_execute.sort(reverse=True)
+        for swap in swaps_to_execute:
+            #TODO implement
+            pass
+
+    def print_planned_swaps(self, index=False):
         #TODO maybe make prettier?
         print()
         out_list_name = f"{self.deck_var_name}_swap_out"
@@ -157,6 +186,8 @@ class deckBuilder:
         for i in range(len(out_cards)):
             out_card = out_cards[i]
             in_card = in_cards[i]
-            formatted_swap = f'{out_card:{max_len}}\t{in_card}'
+            formatted_swap = f'{out_card:{max_len}}\t{in_card:{max_len_in}}'
+            if index:
+                formatted_swap += f"\t{i}"
             print(formatted_swap)
         print()
